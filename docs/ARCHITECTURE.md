@@ -3,11 +3,12 @@
 Developer orientation for building Part 2 (Government) of the governance trio. This is a condensed,
 stable map of the design so a developer can start without cross-referencing another repo for every fact.
 
-> **Early development — nothing here is built.** Everything below is planned. **The canonical, evolving
-> design (including all open questions and the fine detail this doc omits) is
-> [`docs/GOVERNANCE-REALMS-SCOPE.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-REALMS-SCOPE.md)
-> in the pack repo** (issue [#260](https://github.com/theasshats/project-commonwealth/issues/260)). Where
-> this doc and the scope doc disagree, the scope doc wins — update it there, not just here.
+> **Early development — nothing here is built.** Everything below is planned. The full design (with all
+> the open questions and detail this doc omits) is in [`GOVERNANCE-REALMS-SCOPE.md`](GOVERNANCE-REALMS-SCOPE.md)
+> and [`GOVERNANCE-MOD-SPEC.md`](GOVERNANCE-MOD-SPEC.md), mirrored alongside this file. Those mirror the
+> **canonical, evolving copies in the pack repo** (issue
+> [#260](https://github.com/theasshats/project-commonwealth/issues/260)); where this doc and the scope doc
+> disagree, the scope doc wins — update it at the canonical source, not just here.
 
 ## 1. Layering and the dependency rule
 
@@ -147,7 +148,6 @@ scope, precedence, schedule, and trigger*; Part 3 owns the *credit/debit*. Versi
 
 ---
 
-_Canonical source:
-[`GOVERNANCE-REALMS-SCOPE.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-REALMS-SCOPE.md);
-whole-trio spec:
-[`GOVERNANCE-MOD-SPEC.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-MOD-SPEC.md)._
+_Full design, mirrored in this repo: [`GOVERNANCE-REALMS-SCOPE.md`](GOVERNANCE-REALMS-SCOPE.md) ·
+[`GOVERNANCE-MOD-SPEC.md`](GOVERNANCE-MOD-SPEC.md). Canonical source: the same files in
+`theasshats/project-commonwealth/docs/`._

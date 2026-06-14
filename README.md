@@ -15,10 +15,11 @@ reads the ones the pack already runs and hangs *political* state on top of them.
 > types, commands, and behavior described below are **planned, not implemented**, and will change as the
 > design is finalized and spiked. Don't depend on anything here yet.
 >
-> The authoritative, evolving design lives in the pack repo:
-> [**`docs/GOVERNANCE-REALMS-SCOPE.md`**](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-REALMS-SCOPE.md)
-> (issue [#260](https://github.com/theasshats/project-commonwealth/issues/260)). This README and
-> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) summarize it; the scope doc is the source of truth.
+> The full design is mirrored here in [`docs/GOVERNANCE-REALMS-SCOPE.md`](docs/GOVERNANCE-REALMS-SCOPE.md)
+> (this mod's scope) and [`docs/GOVERNANCE-MOD-SPEC.md`](docs/GOVERNANCE-MOD-SPEC.md) (the whole-trio plan);
+> this README and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) summarize them. The **canonical, evolving
+> source** lives in the pack repo (issue
+> [#260](https://github.com/theasshats/project-commonwealth/issues/260)) — the mirrors note it at their top.
 
 ---
 
@@ -106,13 +107,17 @@ instance.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — developer orientation: the Part 1 API contract this
   mod compiles against, the law catalog and enforcement mechanism, the slice plan, and the public surface
   for Part 3.
-- Canonical design (in the pack repo):
-  [`GOVERNANCE-REALMS-SCOPE.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-REALMS-SCOPE.md)
-  (this mod's focused scope) ·
-  [`GOVERNANCE-MOD-SPEC.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE-MOD-SPEC.md)
-  (the whole-trio spec) ·
-  [`GOVERNANCE.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE.md)
-  (scoping + survey).
+- [`docs/GOVERNANCE-REALMS-SCOPE.md`](docs/GOVERNANCE-REALMS-SCOPE.md) — this mod's full design scope (the
+  detailed version of what `ARCHITECTURE.md` summarizes).
+- [`docs/GOVERNANCE-MOD-SPEC.md`](docs/GOVERNANCE-MOD-SPEC.md) — the whole-trio technical spec / three-part
+  implementation plan (`pcmc-territory` → `pcmc-realms` → `pcmc-mint`).
+
+The two `GOVERNANCE-*` files are **mirrors** of the canonical copies in the pack repo, which stays the
+source of truth (see each file's top banner). Not mirrored here:
+[`GOVERNANCE.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/GOVERNANCE.md) (the
+governance scoping + survey) and
+[`CUSTOM-MODS.md`](https://github.com/theasshats/project-commonwealth/blob/main/docs/CUSTOM-MODS.md) (the
+mod-mirror pattern).
 
 ## License
 
