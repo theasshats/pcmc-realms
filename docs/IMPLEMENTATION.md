@@ -41,6 +41,11 @@ the design; this doc is the build's ground truth so a later session can resume.
 - **Cascade cleanup** — listens to `TerritoryEvents.Removed`, calls `GovStore.onEntityRemoved` (detaches
   from parent, orphans children) so the tree leaks no dangling ids (scope §2).
 - **Config** — `realms-server.toml`: combat window, wanted window, purge interval, promotion thresholds.
+- **Debug command (OP)** — `/realm debug wanted <player> [seconds]` / `/realm debug pardon <player>` flag
+  or clear a player wanted in the current jurisdiction through the exact same signal + guard path. This
+  is how the §5 guard spike is tested **without a second player**: standing in your own colony,
+  `/realm debug wanted <you>` turns its guards on you (mirrors Part 1's `debug bindclaim` precedent).
+  Real player-vs-player PVP still needs two players (Open to LAN, or a server).
 - **CI** — `.github/workflows/build.yml`: full build, `:core` tests, packaged-metadata validation
   (incl. asserting the :stubs mirror did NOT leak into the jar), and v*-tag release (mod-mirror).
 

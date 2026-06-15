@@ -22,14 +22,27 @@ public final class WantedService {
 
     private WantedService() {}
 
-    /** Marks an offender wanted in a jurisdiction: table + signal + guard flip. */
+    /** Marks an offender wanted for the configured window: table + signal + guard flip. */
     public static void mark(ServerLevel level, GovSavedData data, UUID jurisdiction, ServerPlayer offender) {
-        long expiry = now(level) + RealmsConfig.wantedWindowTicks();
+        markFor(level, data, jurisdiction, offender, RealmsConfig.wantedWindowTicks());
+    }
+
+    /** Marks an offender wanted for a specific number of ticks (used by the debug command). */
+    public static void markFor(ServerLevel level, GovSavedData data, UUID jurisdiction,
+                               ServerPlayer offender, long durationTicks) {
+        long expiry = now(level) + durationTicks;
         data.wanted().mark(jurisdiction, offender.getUUID(), expiry);
         data.setDirty();
         NeoForge.EVENT_BUS.post(new WantedEvent.Marked(jurisdiction, offender.getUUID(), expiry));
         data.guardEnforcer().flagHostile(level, offender.getUUID(),
                 offender.getGameProfile().getName(), colonyIdsOf(level, jurisdiction));
+    }
+
+    /** Pardons a wanted player: removes the table entry, then signals + restores the guard rank. */
+    public static void pardon(ServerLevel level, GovSavedData data, UUID jurisdiction, UUID player) {
+        data.wanted().clear(jurisdiction, player);
+        data.setDirty();
+        clear(level, data, jurisdiction, player);
     }
 
     /** Clears a wanted entry (expiry or pardon): signal + guard restore. The table entry is already gone. */

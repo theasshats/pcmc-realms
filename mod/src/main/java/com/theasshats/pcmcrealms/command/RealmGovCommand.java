@@ -15,6 +15,7 @@ import com.theasshats.pcmcrealms.core.PromotionRules;
 import com.theasshats.pcmcrealms.core.RealmGov;
 import com.theasshats.pcmcrealms.core.Tier;
 import com.theasshats.pcmcrealms.data.GovSavedData;
+import com.theasshats.pcmcrealms.event.WantedService;
 import com.theasshats.pcmcterritory.api.EntitySnapshot;
 import com.theasshats.pcmcterritory.api.TerritoryApi;
 import com.theasshats.pcmcterritory.core.Role;
@@ -90,7 +91,21 @@ public final class RealmGovCommand {
                                                 .executes(ctx -> fine(ctx.getSource(),
                                                         EntityArgument.getPlayer(ctx, "player"),
                                                         IntegerArgumentType.getInteger(ctx, "amount"),
-                                                        StringArgumentType.getString(ctx, "reason"))))))));
+                                                        StringArgumentType.getString(ctx, "reason")))))))
+                .then(Commands.literal("debug")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("wanted")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> debugWanted(ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player"), -1))
+                                        .then(Commands.argument("seconds", IntegerArgumentType.integer(1))
+                                                .executes(ctx -> debugWanted(ctx.getSource(),
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        IntegerArgumentType.getInteger(ctx, "seconds"))))))
+                        .then(Commands.literal("pardon")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> debugPardon(ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "player")))))));
     }
 
     // --- promote -----------------------------------------------------------
@@ -261,6 +276,53 @@ public final class RealmGovCommand {
         }
         source.sendSuccess(() -> Component.literal(
                 "Fined " + target.getGameProfile().getName() + " " + amount + " into " + entity.name() + "."), true);
+        return 1;
+    }
+
+    // --- debug (OP; makes the SOCIAL/guard pipeline testable without a second player) -----------
+
+    /**
+     * Op helper: flag a player wanted in the executor's current jurisdiction so the guard rank-flip
+     * fires — the only way to exercise the §5 guard spike solo (mirrors Part 1's {@code debug bindclaim}
+     * for an otherwise-unreachable path). Standing in your own colony, {@code /realm debug wanted <you>}
+     * turns its guards on you. {@code seconds < 0} uses the configured wanted window.
+     */
+    private static int debugWanted(CommandSourceStack source, ServerPlayer target, int seconds)
+            throws CommandSyntaxException {
+        ServerPlayer op = source.getPlayerOrException();
+        ServerLevel level = op.serverLevel();
+        GovSavedData data = data(level);
+
+        Optional<UUID> leaf = leafAt(level, op);
+        if (leaf.isEmpty()) {
+            source.sendFailure(Component.literal("No realm governs this location."));
+            return 0;
+        }
+        long duration = seconds < 0 ? RealmsConfig.wantedWindowTicks() : seconds * 20L;
+        WantedService.markFor(level, data, leaf.get(), target, duration);
+
+        String jurisdiction = TerritoryApi.getEntity(level, leaf.get())
+                .map(EntitySnapshot::name).orElse(leaf.get().toString());
+        source.sendSuccess(() -> Component.literal("[debug] " + target.getGameProfile().getName()
+                + " flagged wanted in " + jurisdiction + " for " + (duration / 20) + "s"
+                + " — its guards (if any are near) will aggro."), true);
+        return 1;
+    }
+
+    /** Op helper: clear a player's wanted status in the current jurisdiction and restore their rank. */
+    private static int debugPardon(CommandSourceStack source, ServerPlayer target) throws CommandSyntaxException {
+        ServerPlayer op = source.getPlayerOrException();
+        ServerLevel level = op.serverLevel();
+        GovSavedData data = data(level);
+
+        Optional<UUID> leaf = leafAt(level, op);
+        if (leaf.isEmpty()) {
+            source.sendFailure(Component.literal("No realm governs this location."));
+            return 0;
+        }
+        WantedService.pardon(level, data, leaf.get(), target.getUUID());
+        source.sendSuccess(() -> Component.literal("[debug] pardoned "
+                + target.getGameProfile().getName() + "."), true);
         return 1;
     }
 
