@@ -1,0 +1,34 @@
+// Compile-only stub of the pcmc-territory (Part 1) PUBLIC API surface.
+//
+// WHY THIS EXISTS: pcmc-realms hard-depends on pcmc-territory, but Part 1 does not yet
+// publish a consumable maven artifact (only an open PR branch). This module mirrors the
+// exact public api signatures Part 2 compiles against — read verbatim from Part 1's
+// `com.theasshats.pcmcterritory.api` package — so :mod compiles in CI today. The stub
+// classes throw at runtime and are NEVER bundled into the mod jar; the real pcmc_territory
+// mod supplies these classes when both mods are installed.
+//
+// TO REPLACE (once Part 1 publishes): delete this module, remove it from settings.gradle,
+// and change :mod's `compileOnly project(':stubs')` to `compileOnly "<real territory coords>"`.
+// See stubs/README.md.
+//
+// It applies ModDevGradle only to get Minecraft/NeoForge types on the compile classpath
+// (TerritoryApi references ServerLevel/ChunkPos; TerritoryEvents extends NeoForge's Event).
+
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.78'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(java_version)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+neoForge {
+    version = project.neo_version
+}

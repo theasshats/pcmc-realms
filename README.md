@@ -8,12 +8,15 @@ systems: settlements grow into cities, cities federate into kingdoms and empires
 every tier can issue laws that cascade down the hierarchy. It introduces **no new claim system** — it
 reads the ones the pack already runs and hangs *political* state on top of them.
 
-> ## Status: early development
+> ## Status: pre-alpha — slice 2a implemented, not yet playtested
 >
-> **Nothing is built yet.** This repository currently holds the design and the license — there is no mod
-> code, no Gradle project, and no released jar. `pcmc-realms` is **pre-alpha**: the architecture, law
-> types, commands, and behavior described below are **planned, not implemented**, and will change as the
-> design is finalized and spiked. Don't depend on anything here yet.
+> The Gradle/NeoForge project is scaffolded and **slice 2a (the MVP) is implemented**: the pure
+> government engine (`:core`) with full unit tests, the NeoForge mod layer (`:mod`), and CI. What this
+> means concretely is in [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md). Still **pre-alpha and not
+> verified in-game** — `:core` is unit-tested, but the modding maven repos are unreachable in the pack's
+> web sandbox, so `:mod` compiles only in CI and the runtime behavior (especially MineColonies guard
+> aggro) must be playtested on a real instance. **Green CI ≠ it works.** No released jar yet, so the pack
+> does not reference this mod. 2b (federation hierarchy, secession, charters) is still design-only.
 >
 > The full design is mirrored here in [`docs/GOVERNANCE-REALMS-SCOPE.md`](docs/GOVERNANCE-REALMS-SCOPE.md)
 > (this mod's scope) and [`docs/GOVERNANCE-MOD-SPEC.md`](docs/GOVERNANCE-MOD-SPEC.md) (the whole-trio plan);
@@ -98,9 +101,19 @@ for a tagged release — so this mod reaches players only once it's actually bui
 
 ## Building
 
-There is no build yet. When the Gradle/NeoForge project lands, build and dev instructions will be added
-here. The pack's web sandbox cannot compile or run NeoForge; this mod is built and playtested on a real
-instance.
+Gradle multi-module (mirrors `pcmc-territory`), JDK 21:
+
+- `:core` — the pure government engine (no Minecraft/NeoForge/MineColonies/territory deps). Builds and
+  unit-tests offline: `./gradlew :core:test` (use `--configure-on-demand` in an environment that can't
+  reach the NeoForge maven, so the modding modules aren't configured).
+- `:stubs` — a compile-only mirror of the `pcmc-territory` public API, so `:mod` can compile before
+  Part 1 publishes an artifact. Not bundled into the jar. See [`stubs/README.md`](stubs/README.md).
+- `:mod` — the NeoForge mod. `./gradlew build` compiles it against NeoForge + MineColonies; it needs the
+  modding maven repos, so it builds in **CI**, not the pack's web sandbox.
+
+CI (`.github/workflows/build.yml`) builds everything, runs `:core` tests, validates the packaged
+`neoforge.mods.toml`, and — on a `v*` tag — attaches the jar to a GitHub release (the mod-mirror pattern).
+This mod is **built and playtested on a real instance**; the sandbox can't run NeoForge.
 
 ## Documentation
 

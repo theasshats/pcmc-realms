@@ -1,0 +1,47 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/theasshats/pcmc-realms/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+# Government layer (Part 2). Hangs political state (tiers, hierarchy, laws) off pcmc-territory's
+# entity UUIDs in its own SavedData; owns no claims and no coin. PVP is the only law enforced
+# end-to-end in slice 2a — soft enforcement drives MineColonies guard aggro via the wanted signal.
+
+[[dependencies.${mod_id}]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "${neo_version_range}"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "${minecraft_version_range}"
+    ordering = "NONE"
+    side = "BOTH"
+
+# Hard dependency: the claim-resolution substrate this mod governs. Part 2 loads AFTER it so the
+# territory api/registry exists when Part 2 wires its event listeners.
+[[dependencies.${mod_id}]]
+    modId = "${pcmc_territory_mod_id}"
+    type = "required"
+    versionRange = "${pcmc_territory_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"
+
+# Soft dependency: if absent, SOCIAL laws still raise the wanted signal but have no guard teeth
+# (scope §5 — "no guards nearby → get away with it" falls out for free).
+[[dependencies.${mod_id}]]
+    modId = "minecolonies"
+    type = "optional"
+    versionRange = "${minecolonies_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"
