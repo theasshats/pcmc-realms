@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+build/
+*/build/
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# Run directories (NeoForge dev runs)
+run/
+runs/
+
+# Local dependency drop (the real pcmc-territory jar, once published — see stubs/README.md)
+libs/

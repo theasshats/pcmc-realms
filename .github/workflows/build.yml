@@ -1,0 +1,102 @@
+name: Build
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew build
+
+      # The pure government engine — the verifiable heart of the mod. These run offline; the rest of
+      # the build needs the modding maven repos.
+      - name: Run :core tests
+        run: ./gradlew :core:test
+
+      # A jar that compiles can still be unloadable (pcmc-territory's first playtest shipped one with
+      # unexpanded ${...} placeholders in neoforge.mods.toml). Validate the *packaged* metadata, that
+      # :core is bundled, and that the :stubs territory-api mirror is NOT bundled (the real
+      # pcmc_territory mod must provide those classes at runtime).
+      - name: Validate packaged mod jar
+        run: |
+          jar_path=$(find mod/build/libs -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' | head -n1)
+          echo "Validating $jar_path"
+          unzip -p "$jar_path" META-INF/neoforge.mods.toml > /tmp/jar-mods.toml
+          if grep -q '\${' /tmp/jar-mods.toml; then
+            echo '::error::neoforge.mods.toml in the jar still contains unexpanded ${...} placeholders'
+            cat /tmp/jar-mods.toml
+            exit 1
+          fi
+          python3 - <<'EOF'
+          import tomllib
+          with open('/tmp/jar-mods.toml', 'rb') as f:
+              data = tomllib.load(f)
+          mod = data['mods'][0]
+          assert mod['modId'] == 'pcmc_realms', mod
+          deps = {d['modId'] for d in data['dependencies'][mod['modId']]}
+          assert {'neoforge', 'minecraft', 'pcmc_territory', 'minecolonies'} <= deps, deps
+          required = {d['modId'] for d in data['dependencies'][mod['modId']] if d.get('type') == 'required'}
+          assert 'pcmc_territory' in required, 'pcmc_territory must be a required dependency'
+          print('mods.toml OK:', mod['modId'], mod['version'], '| deps:', sorted(deps))
+          EOF
+          unzip -l "$jar_path" | grep -q 'com/theasshats/pcmcrealms/core/LawResolver.class' \
+            || { echo '::error::bundled :core classes missing from the mod jar'; exit 1; }
+          if unzip -l "$jar_path" | grep -q 'com/theasshats/pcmcterritory/'; then
+            echo '::error::the :stubs territory-api mirror leaked into the mod jar (must be compileOnly)'
+            unzip -l "$jar_path" | grep 'com/theasshats/pcmcterritory/'
+            exit 1
+          fi
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+
+      # Every successful run uploads the jar so playtesters can grab a build from any branch.
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: pcmc_realms-jar
+          path: mod/build/libs/*.jar
+          retention-days: 14
+
+      - name: Locate mod jar
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: jar
+        run: |
+          jar_path=$(find mod/build/libs -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' | head -n1)
+          echo "path=$jar_path" >> "$GITHUB_OUTPUT"
+
+      - name: Print jar sha1
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: sha1sum "${{ steps.jar.outputs.path }}"
+
+      # Mod-mirror release pattern (project-commonwealth/docs/CUSTOM-MODS.md): on a v* tag, attach
+      # the jar to a GitHub release; the pack references that asset via a packwiz manifest.
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.jar.outputs.path }}
+          generate_release_notes: true

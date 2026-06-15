@@ -7,6 +7,28 @@
 
 ---
 
+## Build progress (resume here)
+
+> **Slice 2a is implemented** on branch `claude/bold-brahmagupta-2bf1cd`. Full detail in
+> [`IMPLEMENTATION.md`](IMPLEMENTATION.md); summary:
+>
+> - **Scaffolded** the Gradle multi-module project: `:core` (pure engine, mirrors Part 1's split),
+>   `:stubs` (compile-only mirror of Part 1's api — Part 1 has no published artifact yet; swap when it
+>   releases, see `stubs/README.md`), `:mod` (NeoForge). CI in `.github/workflows/build.yml`.
+> - **`:core` built and unit-tested green** (38 tests): law engine + `LawType`/`LawRegistry`, leaf→root
+>   `LawResolver`, the three `EnforcementMode`s, the SOCIAL justification pipeline (self-defense +
+>   outlaw-open-season), `WantedTable`, `Tier` ladder + `PromotionRules`, `GovStore` hierarchy + cascade.
+> - **`:mod` written** (compiles in CI only — modding mavens gated in this sandbox): PVP combat handler,
+>   `GovSavedData` persistence, `/realm promote|law set|unset|list|wanted|fine`, the MineColonies guard
+>   consumer of the wanted signal, the public `api` package (`RealmsApi`/`FiscalEffect`/`WantedEvent`)
+>   for Part 3.
+> - **Not yet done / next:** the §5 guard spike (runtime aggro + restore — needs a real instance; on the
+>   PR playtest checklist), then slice **2b** (federation composition/carve/secede/war, charters,
+>   ship-realms). Swap `:stubs` for the real territory artifact once Part 1 releases. Cross-repo issues to
+>   file on `pcmc-territory` (Role→api; aeroclaims sub-level resolve; embassy precedence) — see §13.
+
+---
+
 ## Your task
 
 Implement **`pcmc-realms`** (`pcmc_realms`), **Part 2 (Government)** of the Project Commonwealth

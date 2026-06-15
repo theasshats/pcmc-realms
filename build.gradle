@@ -1,0 +1,26 @@
+// Root project — intentionally thin. Each subproject configures its own toolchain/plugins
+// (mirrors pcmc-territory's layout so the two governance mods read the same way):
+//
+//   :core  — pure Java government engine: the tier ladder + promotion validation, the
+//            LawType registry, the leaf->root precedence resolver, the SOCIAL justification
+//            pipeline (self-defense, outlaw-open-season), the wanted table, and the RealmGov
+//            political-state model. NO Minecraft/NeoForge/MineColonies/pcmc-territory deps, so
+//            it builds and unit-tests without network access to the modding maven repos. This
+//            is what `./gradlew :core:test` exercises in environments that can't reach
+//            maven.neoforged.net etc. — the verifiable heart of slice 2a.
+//
+//   :stubs — compile-only mirror of the tiny pcmc-territory PUBLIC API surface
+//            (com.theasshats.pcmcterritory.api + the core types it leaks). It exists ONLY so
+//            :mod can compile in CI before pcmc-territory publishes a consumable artifact; it
+//            is NOT bundled into the mod jar (the real pcmc_territory mod provides these classes
+//            at runtime). Delete it and swap :mod's `compileOnly project(':stubs')` for the real
+//            artifact once Part 1 releases. See stubs/README.md.
+//
+//   :mod   — the NeoForge mod (pcmc_realms). Applies ModDevGradle, depends on :core, compiles
+//            against :stubs (territory API) + MineColonies (guard enforcement), and wires the
+//            engine to real Minecraft types, NBT persistence, Brigadier commands, the combat
+//            event, and the public LawType/effect-hook surface for Part 3 (pcmc-mint).
+//            Requires the NeoForge/CurseMaven maven repos to resolve — gated in this sandbox,
+//            built in CI (.github/workflows/build.yml).
+//
+// `./gradlew build` runs `build` in all three; :core succeeds offline, :mod needs the modding repos.
